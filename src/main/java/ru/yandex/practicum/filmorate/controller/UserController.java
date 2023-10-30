@@ -24,24 +24,26 @@ public class UserController {
     private final Map<Integer, User> users = new HashMap<>();
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
-    private int generateId = 0;
+    private int generateId = 1;
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-        user.setId(generateId++);
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            log.warn("Email = null или не имеет знака @");
-            throw new ValidationException();
-        } else if (user.getLogin().isBlank()) {
-            log.warn("Login пуст");
-            throw new ValidationException();
-        } else if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения не может быть в будущем");
-            throw new ValidationException();
-        }
-        log.info("Пользователь добавлен");
+//        if(!users.containsKey(user.getId())) {
+            user.setId(generateId++);
+            if (user.getEmail()== null || !user.getEmail().contains("@")) {
+                log.warn("Email = null или не имеет знака @");
+                throw new ValidationException();
+            } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+                log.warn("Login пуст");
+                throw new ValidationException();
+            } else if (user.getName() == null || user.getName().isBlank()) {
+                user.setName(user.getLogin());
+            } else if (user.getBirthday().isAfter(LocalDate.now())) {
+                log.warn("Дата рождения не может быть в будущем");
+                throw new ValidationException();
+            }
+            log.info("Пользователь добавлен");
+//        }
         users.put(user.getId(), user);
         return user;
     }
@@ -54,20 +56,22 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            log.warn("Email = null или не имеет знака @");
-            throw new ValidationException();
-        } else if (user.getLogin().isBlank()) {
-            log.warn("Login пуст");
-            throw new ValidationException();
-        } else if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения не может быть в будущем");
-            throw new ValidationException();
+        if(users.containsKey(user.getId())) {
+            if (user.getEmail() == null || !user.getEmail().contains("@")) {
+                log.warn("Email = null или не имеет знака @");
+                throw new ValidationException();
+            } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+                log.warn("Login пуст");
+                throw new ValidationException();
+            } else if (user.getName() == null || user.getName().isBlank()) {
+                user.setName(user.getLogin());
+            } else if (user.getBirthday().isAfter(LocalDate.now())) {
+                log.warn("Дата рождения не может быть в будущем");
+                throw new ValidationException();
+            }
+            log.info("Пользователь обновлен");
+            users.put(user.getId(), user);
         }
-        log.info("Пользователь обновлен");
-        users.put(user.getId(), user);
         return user;
     }
 }

@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private int generateId = 0;
+    private int generateId = 1;
     private final Map<Integer, Film> films = new HashMap<>();
 
     @PostMapping
@@ -34,7 +34,7 @@ public class FilmController {
         } else if (film.getDescription().length() > 200) {
             log.warn("Максимальная длина описания - 200 символов.");
             throw new ValidationException();
-        } else if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28))) {
+        } else if (film.getReleaseDate().isAfter(LocalDate.of(1985, 12, 28))) {
             log.warn("Дата релиза - не раньше 28 декабря 1895 года.");
             throw new ValidationException();
         } else if (film.getDuration() < 0) {
@@ -54,21 +54,23 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        if (film.getName().isBlank()) {
-            log.warn("Name не может быть пустым");
-            throw new ValidationException();
-        } else if (film.getDescription().length() > 200) {
-            log.warn("Максимальная длина описания - 200 символов.");
-            throw new ValidationException();
-        } else if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28))) {
-            log.warn("Дата релиза - не раньше 28 декабря 1895 года.");
-            throw new ValidationException();
-        } else if (film.getDuration() < 0) {
-            log.warn("Продолжительность фильма должна быть положительной.");
-            throw new ValidationException();
+        if(films.containsKey(film.getId())) {
+            if (film.getName().isBlank()) {
+                log.warn("Name не может быть пустым");
+                throw new ValidationException();
+            } else if (film.getDescription().length() > 200) {
+                log.warn("Максимальная длина описания - 200 символов.");
+                throw new ValidationException();
+            } else if (film.getReleaseDate().isAfter(LocalDate.of(1985, 12, 28))) {
+                log.warn("Дата релиза - не раньше 28 декабря 1895 года.");
+                throw new ValidationException();
+            } else if (film.getDuration() < 0) {
+                log.warn("Продолжительность фильма должна быть положительной.");
+                throw new ValidationException();
+            }
+            log.info("Фильм обновлен");
+            films.put(film.getId(), film);
         }
-        log.info("Фильм обновлен");
-        films.put(film.getId(), film);
         return film;
     }
 }
