@@ -34,7 +34,7 @@ public class FilmController {
         } else if (film.getDescription().length() > 200) {
             log.warn("Максимальная длина описания - 200 символов.");
             throw new ValidationException();
-        } else if (film.getReleaseDate().isAfter(LocalDate.of(1985, 12, 28))) {
+        } else if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28))) {
             log.warn("Дата релиза - не раньше 28 декабря 1895 года.");
             throw new ValidationException();
         } else if (film.getDuration() < 0) {
@@ -54,14 +54,14 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        if(films.containsKey(film.getId())) {
+        if (films.containsKey(film.getId())) {
             if (film.getName().isBlank()) {
                 log.warn("Name не может быть пустым");
                 throw new ValidationException();
             } else if (film.getDescription().length() > 200) {
                 log.warn("Максимальная длина описания - 200 символов.");
                 throw new ValidationException();
-            } else if (film.getReleaseDate().isAfter(LocalDate.of(1985, 12, 28))) {
+            } else if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28))) {
                 log.warn("Дата релиза - не раньше 28 декабря 1895 года.");
                 throw new ValidationException();
             } else if (film.getDuration() < 0) {

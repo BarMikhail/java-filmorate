@@ -29,20 +29,20 @@ public class UserController {
     @PostMapping
     public User createUser(@RequestBody User user) {
 //        if(!users.containsKey(user.getId())) {
-            user.setId(generateId++);
-            if (user.getEmail()== null || !user.getEmail().contains("@")) {
-                log.warn("Email = null или не имеет знака @");
-                throw new ValidationException();
-            } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-                log.warn("Login пуст");
-                throw new ValidationException();
-            } else if (user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            } else if (user.getBirthday().isAfter(LocalDate.now())) {
-                log.warn("Дата рождения не может быть в будущем");
-                throw new ValidationException();
-            }
-            log.info("Пользователь добавлен");
+        user.setId(generateId++);
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            log.warn("Email = null или не имеет знака @");
+            throw new ValidationException();
+        } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+            log.warn("Login пуст");
+            throw new ValidationException();
+        } else if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        } else if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.warn("Дата рождения не может быть в будущем");
+            throw new ValidationException();
+        }
+        log.info("Пользователь добавлен");
 //        }
         users.put(user.getId(), user);
         return user;
@@ -56,7 +56,7 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
-        if(users.containsKey(user.getId())) {
+        if (users.containsKey(user.getId())) {
             if (user.getEmail() == null || !user.getEmail().contains("@")) {
                 log.warn("Email = null или не имеет знака @");
                 throw new ValidationException();
