@@ -28,24 +28,33 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-//        if(!users.containsKey(user.getId())) {
+        validate(user);
+
         user.setId(generateId++);
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            log.warn("Email = null или не имеет знака @");
-            throw new ValidationException();
-        } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.warn("Login пуст");
-            throw new ValidationException();
-        } else if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения не может быть в будущем");
-            throw new ValidationException();
-        }
         log.info("Пользователь добавлен");
-//        }
         users.put(user.getId(), user);
         return user;
+    }
+
+    public void validate(User user) {
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            log.warn("Email пуст");
+            throw new ValidationException("Проверь Email");
+        }
+        if (!(user.getLogin() == null || user.getLogin().isBlank())) {
+            String[] login = user.getLogin().split(" ");
+            if (login.length > 1) {
+                log.warn("Что-то не так с login");
+                throw new ValidationException("Проверь login");
+            }
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.warn("Дата рождения не может быть в будущем");
+            throw new ValidationException("Дата рождения не может быть в будущем");
+        }
     }
 
     @GetMapping
@@ -56,22 +65,12 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            if (user.getEmail() == null || !user.getEmail().contains("@")) {
-                log.warn("Email = null или не имеет знака @");
-                throw new ValidationException();
-            } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-                log.warn("Login пуст");
-                throw new ValidationException();
-            } else if (user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            } else if (user.getBirthday().isAfter(LocalDate.now())) {
-                log.warn("Дата рождения не может быть в будущем");
-                throw new ValidationException();
-            }
-            log.info("Пользователь обновлен");
-            users.put(user.getId(), user);
+        if (!users.containsKey(user.getId())) {
+            throw new ValidationException("Нет такого Id");
         }
+        validate(user);
+        log.info("Пользователь обновлен");
+        users.put(user.getId(), user);
         return user;
     }
 }
