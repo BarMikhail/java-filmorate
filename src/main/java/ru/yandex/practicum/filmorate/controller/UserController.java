@@ -36,6 +36,23 @@ public class UserController {
         return user;
     }
 
+    @GetMapping
+    public List<User> getAllUser() {
+        log.info("Все пользователи выведены");
+        return new ArrayList<>(users.values());
+    }
+
+    @PutMapping
+    public User updateUser(@RequestBody User user) {
+        if (!users.containsKey(user.getId())) {
+            throw new ValidationException("Нет такого Id");
+        }
+        validate(user);
+        log.info("Пользователь обновлен");
+        users.put(user.getId(), user);
+        return user;
+    }
+
     public void validate(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.warn("Email пуст");
@@ -55,22 +72,5 @@ public class UserController {
             log.warn("Дата рождения не может быть в будущем");
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
-    }
-
-    @GetMapping
-    public List<User> getAllUser() {
-        log.info("Все пользователи выведены");
-        return new ArrayList<>(users.values());
-    }
-
-    @PutMapping
-    public User updateUser(@RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Нет такого Id");
-        }
-        validate(user);
-        log.info("Пользователь обновлен");
-        users.put(user.getId(), user);
-        return user;
     }
 }

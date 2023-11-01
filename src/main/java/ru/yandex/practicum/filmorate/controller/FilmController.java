@@ -36,6 +36,23 @@ public class FilmController {
         return film;
     }
 
+    @GetMapping
+    public List<Film> getAllFilms() {
+        log.info("Все фильмы выведены");
+        return new ArrayList<>(films.values());
+    }
+
+    @PutMapping
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        if (!films.containsKey(film.getId())) {
+            throw new ValidationException("Нет такого Id");
+        }
+        validate(film);
+        log.info("Фильм обновлен");
+        films.put(film.getId(), film);
+        return film;
+    }
+
     private void validate(Film film) throws ValidationException {
         if (film.getName().isBlank()) {
             log.warn("Name пустой");
@@ -54,22 +71,4 @@ public class FilmController {
             throw new ValidationException("Продолжительность фильма должна быть положительной.");
         }
     }
-
-    @GetMapping
-    public List<Film> getAllFilms() {
-        log.info("Все фильмы выведены");
-        return new ArrayList<>(films.values());
-    }
-
-    @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Нет такого Id");
-        }
-        validate(film);
-        log.info("Фильм обновлен");
-        films.put(film.getId(), film);
-        return film;
-    }
-
 }

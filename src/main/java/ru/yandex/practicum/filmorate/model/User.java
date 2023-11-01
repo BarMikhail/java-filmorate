@@ -10,8 +10,6 @@ import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
-//@NoArgsConstructor
-//@EqualsAndHashCode(exclude = {"id"})
 public class User {
     @NotNull
     private int id;
