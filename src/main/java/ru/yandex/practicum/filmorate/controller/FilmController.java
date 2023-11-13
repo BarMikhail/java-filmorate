@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -22,53 +23,27 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private int generateId = 1;
 
-    @PostMapping
-    public Film createFilm(@RequestBody Film film) {
-        validate(film);
+    private final InMemoryFilmStorage inMemoryFilmStorage;
 
-        film.setId(generateId++);
-        log.info("Фильм добавлен");
-        films.put(film.getId(), film);
-        return film;
+    public FilmController(InMemoryFilmStorage inMemoryFilmStorage){
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
     }
 
     @GetMapping
     public List<Film> getAllFilms() {
-        log.info("Все фильмы выведены");
-        return new ArrayList<>(films.values());
+        return inMemoryFilmStorage.getAllFilms();
+    }
+
+    @PostMapping
+    public Film createFilm(@RequestBody Film film) {
+        return inMemoryFilmStorage.createFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Нет такого Id");
-        }
-        validate(film);
-        log.info("Фильм обновлен");
-        films.put(film.getId(), film);
-        return film;
+        return inMemoryFilmStorage.updateFilm(film);
     }
 
-    private void validate(Film film) throws ValidationException {
-        if (film.getName().isBlank()) {
-            log.warn("Name пустой");
-            throw new ValidationException("Проверь name");
-        }
-        if (film.getDescription().length() > 200) {
-            log.warn("Слишком большое описание");
-            throw new ValidationException("Максимальная длина описания - 200 символов.");
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Дата выходит за пределы");
-            throw new ValidationException("Дата релиза - не раньше 28 декабря 1895 года.");
-        }
-        if (film.getDuration() < 0) {
-            log.warn("Продолжительность меньше 0");
-            throw new ValidationException("Продолжительность фильма должна быть положительной.");
-        }
-    }
+
 }
