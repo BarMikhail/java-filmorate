@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -13,10 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
     private int generateId = 1;
 
     @Override
@@ -28,9 +27,8 @@ public class InMemoryFilmStorage implements FilmStorage{
     @Override
     public Film createFilm(Film film) {
         validate(film);
-
         film.setId(generateId++);
-        log.info("Фильм добавлен");
+        log.info("Фильм {} добавлен", film.getName());
         films.put(film.getId(), film);
         return film;
     }
@@ -38,18 +36,31 @@ public class InMemoryFilmStorage implements FilmStorage{
     @Override
     public Film updateFilm(Film film) {
         if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Нет такого Id");
+            throw new NotFoundException(String.format("Id %s нет", film.getId()));
         }
         validate(film);
-        log.info("Фильм обновлен");
+        log.info("Фильм {} обновлен", film.getName());
         films.put(film.getId(), film);
         return film;
     }
 
     @Override
-    public Film deleteFilm(Film film) {
-        return null;
+    public void deleteFilm(Integer id) {
+        if (!films.containsKey(id)) {
+            throw new NotFoundException(String.format("Id %s нет", id));
+        }
+        films.remove(id);
+        log.info("Фильм с {} удален", films.get(id).getName());
     }
+
+    @Override
+    public Film getById(Integer id) {
+        if (!films.containsKey(id)) {
+            throw new NotFoundException(String.format("Id %s нет", id));
+        }
+        return films.get(id);
+    }
+
 
     private void validate(Film film) throws ValidationException {
         if (film.getName().isBlank()) {
@@ -57,11 +68,11 @@ public class InMemoryFilmStorage implements FilmStorage{
             throw new ValidationException("Проверь name");
         }
         if (film.getDescription().length() > 200) {
-            log.warn("Слишком большое описание");
+            log.warn("Слишком большое описание, {}", film.getDescription().length());
             throw new ValidationException("Максимальная длина описания - 200 символов.");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Дата выходит за пределы");
+            log.warn("Дата {} выходит за пределы", film.getReleaseDate());
             throw new ValidationException("Дата релиза - не раньше 28 декабря 1895 года.");
         }
         if (film.getDuration() < 0) {

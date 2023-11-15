@@ -1,36 +1,31 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+@Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private int generateId = 1;
 
     @Override
     public List<User> getAllUser() {
-        log.info("Все пользователи выведены");
+        log.info("Вывод всех пользователей");
         return new ArrayList<>(users.values());
     }
 
     @Override
     public User createUser(User user) {
         validate(user);
-
         user.setId(generateId++);
-        log.info("Пользователь добавлен");
+        log.info("Пользователь с id {} добавлен", user.getId());
         users.put(user.getId(), user);
         return user;
     }
@@ -38,28 +33,41 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Нет такого Id");
+            throw new NotFoundException(String.format("Id %s нет", user.getId()));
         }
         validate(user);
-        log.info("Пользователь обновлен");
+        log.info("Пользователь с id {}  обновлен", user.getId());
         users.put(user.getId(), user);
         return user;
     }
 
     @Override
-    public User deleteUser(User user) {
-        return null;
+    public void deleteUser(int id) {
+        if (!users.containsKey(id)) {
+            throw new NotFoundException(String.format("Id %s нет", id));
+        }
+        users.remove(id);
+        log.info("Пользователь с id {} удален", id);
+    }
+
+    @Override
+    public User getById(int id) {
+        if (!users.containsKey(id)) {
+            throw new NotFoundException(String.format("Id %s нет", id));
+        }
+        log.info("Вывод пользователя с id {}", id);
+        return users.get(id);
     }
 
     private void validate(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
-            log.warn("Email пуст");
+            log.warn("Email у пользователя с id {} пуст", user.getId());
             throw new ValidationException("Проверь Email");
         }
         if (!(user.getLogin() == null || user.getLogin().isBlank())) {
             String[] login = user.getLogin().split(" ");
             if (login.length > 1) {
-                log.warn("Что-то не так с login");
+                log.warn("У пользователя с id {} что-то не так с login", user.getId());
                 throw new ValidationException("Проверь login");
             }
         }
@@ -67,8 +75,8 @@ public class InMemoryUserStorage implements UserStorage {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
+            log.warn("Дата рождения {} не может быть в будущем", user.getBirthday());
+            throw new ValidationException("Дата рождения не может быть в будущем.");
         }
     }
 }
