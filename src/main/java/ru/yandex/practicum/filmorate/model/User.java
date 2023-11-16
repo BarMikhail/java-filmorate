@@ -41,8 +41,7 @@ public class User {
 
     public void deleteFriends(Integer id) {
         if (!friends.contains(id)) {
-            throw new NotFoundException(String.format
-                    ("У пользователя %s нет друга с таким id %s", getName(), id));
+            throw new NotFoundException(String.format("У пользователя %s нет друга с таким id %s", getName(), id));
         }
         friends.remove(id);
     }
