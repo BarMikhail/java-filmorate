@@ -34,8 +34,7 @@ public class Film {
 
     public void deleteLike(Integer id) {
         if (!like.contains(id)) {
-            throw new NotFoundException(String.format
-                    ("У фильма %s нечего убирать", getName()));
+            throw new NotFoundException(String.format("У фильма %s нечего убирать", getName()));
         }
         like.remove(id);
     }
