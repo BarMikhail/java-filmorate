@@ -19,23 +19,20 @@ public class UserService {
 
 
     public void addFriend(int id, int friendId) {
-//        log.info("alarm");
         if (id == friendId) {
             throw new ValidationException("Ты не можешь быть своим же другом");
         }
-//        User u1 = inMemoryUserStorage.getById(id);
-//        User u2 = inMemoryUserStorage.getById(friendId);
-//        u1.addFriends(friendId);
-//        u2.addFriends(id);
-        inMemoryUserStorage.getById(id).addFriends(friendId);
-        inMemoryUserStorage.getById(friendId).addFriends(id);
+        User u1 = inMemoryUserStorage.getById(id);
+        User u2 = inMemoryUserStorage.getById(friendId);
+        u1.addFriends(friendId);
+        u2.addFriends(id);
         log.info("Пользователь с id {} добавил в друзья пользователя с id {}", id, friendId);
     }
 
     public void deleteFriend(int id, int friendId) {
-//        if (id == friend) {
-//            throw new ValidationException("Ты не можешь быть своим же другом");
-//        }
+        if (id == friendId) {
+            throw new ValidationException("Ты не можешь быть своим же другом");
+        }
         inMemoryUserStorage.getById(id).deleteFriends(friendId);
         inMemoryUserStorage.getById(friendId).deleteFriends(id);
         log.info("Пользователь с id {} удалил из друзей пользователя с id {}", id, friendId);
