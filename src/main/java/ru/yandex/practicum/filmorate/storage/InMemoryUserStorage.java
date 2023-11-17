@@ -7,7 +7,11 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.*;
+//import java.util;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -36,8 +40,11 @@ public class InMemoryUserStorage implements UserStorage {
             throw new NotFoundException(String.format("Id %s нет", user.getId()));
         }
         validate(user);
+        users.get(user.getId()).setName(user.getName());
+        users.get(user.getId()).setBirthday(user.getBirthday());
+        users.get(user.getId()).setEmail(user.getEmail());
+        users.get(user.getId()).setLogin(user.getLogin());
         log.info("Пользователь с id {}  обновлен", user.getId());
-        users.put(user.getId(), user);
         return user;
     }
 

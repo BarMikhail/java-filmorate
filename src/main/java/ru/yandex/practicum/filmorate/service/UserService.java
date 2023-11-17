@@ -7,7 +7,9 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,11 +24,11 @@ public class UserService {
         if (id == friendId) {
             throw new ValidationException("Ты не можешь быть своим же другом");
         }
-        User u1 = inMemoryUserStorage.getById(id);
-        User u2 = inMemoryUserStorage.getById(friendId);
-        u1.addFriends(friendId);
-        u2.addFriends(id);
-        log.info("Пользователь с id {} добавил в друзья пользователя с id {}", id, friendId);
+        User firstUser = inMemoryUserStorage.getById(id);
+        User secondUser = inMemoryUserStorage.getById(friendId);
+        firstUser.addFriends(friendId);
+        secondUser.addFriends(id);
+        log.debug("Пользователь с id {} добавил в друзья пользователя с id {}", id, friendId);
     }
 
     public void deleteFriend(int id, int friendId) {
@@ -35,7 +37,7 @@ public class UserService {
         }
         inMemoryUserStorage.getById(id).deleteFriends(friendId);
         inMemoryUserStorage.getById(friendId).deleteFriends(id);
-        log.info("Пользователь с id {} удалил из друзей пользователя с id {}", id, friendId);
+        log.debug("Пользователь с id {} удалил из друзей пользователя с id {}", id, friendId);
     }
 
     public List<User> getFriend(int id) {
@@ -46,7 +48,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> getCommonFriend(int id, int otherId) {
+    public final List<User> getCommonFriend(int id, int otherId) {
         Set<Integer> user = inMemoryUserStorage.getById(id).getFriends();
         Set<Integer> userFriend = inMemoryUserStorage.getById(otherId).getFriends();
         List<User> users = new ArrayList<>();
@@ -55,7 +57,7 @@ public class UserService {
                 users.add(inMemoryUserStorage.getById(friend));
             }
         }
-        log.info("Вывод общих друзей {} с {}", id, otherId);
+        log.debug("Вывод общих друзей {} с {}", id, otherId);
         return users;
     }
 

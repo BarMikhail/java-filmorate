@@ -39,8 +39,11 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new NotFoundException(String.format("Id %s нет", film.getId()));
         }
         validate(film);
+        films.get(film.getId()).setName(film.getName());
+        films.get(film.getId()).setDescription(film.getDescription());
+        films.get(film.getId()).setDuration(film.getDuration());
+        films.get(film.getId()).setReleaseDate(film.getReleaseDate());
         log.info("Фильм {} обновлен", film.getName());
-        films.put(film.getId(), film);
         return film;
     }
 

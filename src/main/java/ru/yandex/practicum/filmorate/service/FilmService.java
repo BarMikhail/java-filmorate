@@ -19,16 +19,16 @@ public class FilmService {
 
     public void addLike(int id, int otherId) {
         inMemoryFilmStorage.getById(id).addLike(otherId);
-        log.info("Лайк поставлен");
+        log.debug("Лайк поставлен");
     }
 
     public void deleteLike(int id, int otherId) {
         inMemoryFilmStorage.getById(id).deleteLike(otherId);
-        log.info("Лайк удален");
+        log.debug("Лайк удален");
     }
 
     public List<Film> getMostLikedFilms(int count) {
-        log.info("Вывод самых понравившихся фильмов");
+        log.debug("Вывод самых понравившихся фильмов");
         List<Film> films = new ArrayList<>(inMemoryFilmStorage.getAllFilms());
         return films.stream()
                 .sorted((f1, f2) -> (f2.getLike().size() - f1.getLike().size()))
