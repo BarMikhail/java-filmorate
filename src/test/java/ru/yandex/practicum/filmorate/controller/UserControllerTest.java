@@ -71,7 +71,7 @@ class UserControllerTest {
         user.setBirthday(LocalDate.of(2040, 2, 10));
         assertThrows(ValidationException.class, () -> inMemoryUserStorage.createUser(user));
     }
-//
+
     @DisplayName("Проверка вывода всех пользователей")
     @Test
     void getAllUsers() {
@@ -79,7 +79,7 @@ class UserControllerTest {
         inMemoryUserStorage.createUser(user1);
         assertEquals(inMemoryUserStorage.getAllUser().size(), 2);
     }
-//
+
     @DisplayName("Проверка обновления пользователя")
     @Test
     void updateUser() {
@@ -93,6 +93,7 @@ class UserControllerTest {
                 .build());
         assertEquals(inMemoryUserStorage.getById(1).getName(),"name");
     }
+
     @DisplayName("Проверка вывода 1 пользователя")
     @Test
     void getByIdTest() {
