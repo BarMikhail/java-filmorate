@@ -29,13 +29,13 @@
 
 Примеры запросов на SQL
 * Получения списка пользователей
-```
+```sql
 SELECT *
 FROM User
 ```
 
 * Получение списков друзей всех пользователей:
-```
+```sql
 SELECT u.user_id,
        f.friend_id
 FROM user AS u
@@ -44,13 +44,13 @@ ORDER BY u.user_id;
 ```
 
 * Получение списка всех фильмов:
-```
+```sql
  SELECT *
  FROM film
 ```
 
 * Получение списка всех фильмов с упорядочиванием по количеству лайков:
-```
+```sql
 SELECT *
 FROM film
 ORDER BY likes;
