@@ -15,4 +15,5 @@ public interface UserStorage {
     void deleteUser(int id);
 
     User getById(int id);
+
 }
