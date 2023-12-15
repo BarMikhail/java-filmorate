@@ -5,7 +5,9 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -16,7 +18,9 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private final Set<Integer> like = new HashSet<>();
+    private MPA mpa;
+    private Set<Genre> genres = new HashSet<>();
+    private Set<Integer> like = new HashSet<>();
 
     public void addLike(Integer id) {
         like.add(id);
@@ -27,5 +31,15 @@ public class Film {
             throw new NotFoundException(String.format("У фильма %s нечего убирать", getName()));
         }
         like.remove(id);
+    }
+
+    public Map<String, Object> toMap(){
+        Map<String,Object> values = new HashMap<>();
+        values.put("name",name);
+        values.put("description",description);
+        values.put("release_date",releaseDate);
+        values.put("duration",duration);
+        values.put("mpa_id",mpa.getId());
+        return values;
     }
 }
