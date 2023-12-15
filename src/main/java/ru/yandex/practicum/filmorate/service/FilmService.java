@@ -52,7 +52,7 @@ public class FilmService {
     public List<Film> getMostLikedFilms(int count) {
         List<Film> films = likeStorage.getMostLikedFilms(count);
         log.info("Получение списка самых пролайканых фильмов");
-        return RecordingGenreAndMPA(films);
+        return recordingGenreAndMPA(films);
     }
 
     public Film createFilm(Film film) {
@@ -91,10 +91,10 @@ public class FilmService {
             film.setLike(likeStorage.getLikes(film.getId()));
         }
         log.info("Вывод всех фильмов");
-        return RecordingGenreAndMPA(films);
+        return recordingGenreAndMPA(films);
     }
 
-    private List<Film> RecordingGenreAndMPA(List<Film> films) {
+    private List<Film> recordingGenreAndMPA(List<Film> films) {
         List<MPA> mpa = mpaStorage.getAllMPA();
         List<Film> fullFilms = new ArrayList<>();
         for (Film film : films) {
