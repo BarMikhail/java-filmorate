@@ -26,7 +26,7 @@ public class FilmService {
     private final MPAStorage mpaStorage;
 
     @Autowired
-    public FilmService(@Qualifier("film2") FilmStorage filmStorage, @Qualifier("like") LikeStorage likeStorage,
+    public FilmService(@Qualifier("filmDBStorage") FilmStorage filmStorage, @Qualifier("likeDBStorage") LikeStorage likeStorage,
                        GenreStorage genreStorage, MPAStorage mpaStorage) {
         this.filmStorage = filmStorage;
         this.likeStorage = likeStorage;

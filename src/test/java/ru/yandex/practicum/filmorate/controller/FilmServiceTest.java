@@ -16,12 +16,12 @@ import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.impl.FilmImpl;
-import ru.yandex.practicum.filmorate.storage.impl.GenreImpl;
-import ru.yandex.practicum.filmorate.storage.impl.LikeImpl;
-import ru.yandex.practicum.filmorate.storage.impl.MPAImpl;
-import ru.yandex.practicum.filmorate.storage.impl.UserImpl;
-import ru.yandex.practicum.filmorate.storage.impl.FriendImpl;
+import ru.yandex.practicum.filmorate.storage.impl.FilmStorageImpl;
+import ru.yandex.practicum.filmorate.storage.impl.GenreStorageImpl;
+import ru.yandex.practicum.filmorate.storage.impl.LikeStorageImpl;
+import ru.yandex.practicum.filmorate.storage.impl.MPAStorageImpl;
+import ru.yandex.practicum.filmorate.storage.impl.UserStorageImpl;
+import ru.yandex.practicum.filmorate.storage.impl.FriendStorageImpl;
 
 
 import java.time.LocalDate;
@@ -47,9 +47,9 @@ class FilmServiceTest {
 
     @BeforeEach
     public void setUp() {
-        filmService = new FilmService(new FilmImpl(jdbcTemplate), new LikeImpl(jdbcTemplate),
-                new GenreImpl(jdbcTemplate), new MPAImpl(jdbcTemplate));
-        userService = new UserService(new UserImpl(jdbcTemplate), new FriendImpl(jdbcTemplate));
+        filmService = new FilmService(new FilmStorageImpl(jdbcTemplate), new LikeStorageImpl(jdbcTemplate),
+                new GenreStorageImpl(jdbcTemplate), new MPAStorageImpl(jdbcTemplate));
+        userService = new UserService(new UserStorageImpl(jdbcTemplate), new FriendStorageImpl(jdbcTemplate));
         film = Film.builder()
                 .id(1)
                 .name("na")

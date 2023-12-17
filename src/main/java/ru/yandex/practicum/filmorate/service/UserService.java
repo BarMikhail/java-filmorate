@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validate.Validate;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +20,7 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
 
-    public UserService(@Qualifier("user2") UserStorage userStorage, @Qualifier("friend") FriendStorage friendStorage) {
+    public UserService(@Qualifier("userDBStorage") UserStorage userStorage, @Qualifier("friendDBStorage") FriendStorage friendStorage) {
         this.userStorage = userStorage;
         this.friendStorage = friendStorage;
     }
@@ -45,13 +44,8 @@ public class UserService {
     }
 
     public List<User> getFriend(int id) {
-        List<User> userFriends = new ArrayList<>();
-        List<Integer> friendsId = friendStorage.getFriend(id);
-        for (Integer userId : friendsId) {
-            userFriends.add(getById(userId));
-        }
         log.info("Вывод друзей");
-        return userFriends;
+        return friendStorage.getFriends(id);
     }
 
     public final List<User> getCommonFriend(int id, int otherId) {

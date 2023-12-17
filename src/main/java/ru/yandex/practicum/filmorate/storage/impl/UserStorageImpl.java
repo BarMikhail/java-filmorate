@@ -16,15 +16,15 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
-@Component("user2")
+@Component("userDBStorage")
 @RequiredArgsConstructor
-public class UserImpl implements UserStorage {
+public class UserStorageImpl implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public List<User> getAllUser() {
         log.info("Вывод всех пользователей");
-        return jdbcTemplate.query("SELECT * FROM users", UserImpl::mapRowToUser);
+        return jdbcTemplate.query("SELECT * FROM users", UserStorageImpl::mapRowToUser);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class UserImpl implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        if (getAllUser().stream().anyMatch(x -> x.getId() == user.getId())) {
+        if (getById(user.getId()) != null) {
             jdbcTemplate.update(
                     "UPDATE users SET email = ?, login = ?, name  = ?, birthday = ? WHERE user_id = ?",
                     user.getEmail(),
@@ -69,13 +69,13 @@ public class UserImpl implements UserStorage {
     @Override
     public User getById(int id) {
         try {
-            return jdbcTemplate.queryForObject("SELECT * FROM users WHERE user_id = ?", UserImpl::mapRowToUser, id);
+            return jdbcTemplate.queryForObject("SELECT * FROM users WHERE user_id = ?", UserStorageImpl::mapRowToUser, id);
         } catch (RuntimeException e) {
             throw new NotFoundException(String.format("Id %s нет", id));
         }
     }
 
-    private static User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
+    public static User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
         Integer id = rs.getInt("user_id");
         String name = rs.getString("name");
         String login = rs.getString("login");

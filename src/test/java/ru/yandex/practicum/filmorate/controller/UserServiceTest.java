@@ -12,8 +12,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.impl.FriendImpl;
-import ru.yandex.practicum.filmorate.storage.impl.UserImpl;
+import ru.yandex.practicum.filmorate.storage.impl.FriendStorageImpl;
+import ru.yandex.practicum.filmorate.storage.impl.UserStorageImpl;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,7 +35,7 @@ class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-        userService = new UserService(new UserImpl(jdbcTemplate), new FriendImpl(jdbcTemplate));
+        userService = new UserService(new UserStorageImpl(jdbcTemplate), new FriendStorageImpl(jdbcTemplate));
         user = User.builder()
                 .id(1)
                 .email("na@s")

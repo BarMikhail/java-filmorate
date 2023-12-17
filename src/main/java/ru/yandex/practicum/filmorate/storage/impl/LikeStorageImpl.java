@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-@Component("like")
+@Component("likeDBStorage")
 @RequiredArgsConstructor
-public class LikeImpl implements LikeStorage {
+public class LikeStorageImpl implements LikeStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -53,7 +53,7 @@ public class LikeImpl implements LikeStorage {
     @Override
     public Set<Integer> getLikes(int filmId) {
         return new HashSet<>(jdbcTemplate.query(
-                "SELECT user_id FROM likes  WHERE film_id =?", LikeImpl::mapRowToLike, filmId));
+                "SELECT user_id FROM likes  WHERE film_id =?", LikeStorageImpl::mapRowToLike, filmId));
     }
 
     private static int mapRowToLike(ResultSet resultSet, int rowNum) throws SQLException {

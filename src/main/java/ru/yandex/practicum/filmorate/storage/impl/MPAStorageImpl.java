@@ -15,22 +15,22 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class MPAImpl implements MPAStorage {
+public class MPAStorageImpl implements MPAStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public MPA getById(int id) {
-        if (getAllMPA().stream().anyMatch(x -> x.getId() == id)) {
+        try {
             return jdbcTemplate.queryForObject("SELECT * FROM mpa WHERE mpa_id = ?",
-                    MPAImpl::mapRow, id);
-        } else {
+                    MPAStorageImpl::mapRow, id);
+        } catch (RuntimeException e) {
             throw new NotFoundException(String.format("Нет рейтинга с id %d", id));
         }
     }
 
     @Override
     public List<MPA> getAllMPA() {
-        return jdbcTemplate.query("SELECT * FROM mpa ORDER BY mpa_id", MPAImpl::mapRow);
+        return jdbcTemplate.query("SELECT * FROM mpa ORDER BY mpa_id", MPAStorageImpl::mapRow);
     }
 
     private static MPA mapRow(ResultSet rs, int rowNum) throws SQLException {

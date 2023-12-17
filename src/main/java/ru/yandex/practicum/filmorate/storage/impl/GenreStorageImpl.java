@@ -18,14 +18,14 @@ import java.util.Set;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GenreImpl implements GenreStorage {
+public class GenreStorageImpl implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public Genre getById(int id) {
         try {
             return jdbcTemplate.queryForObject("SELECT * FROM genres WHERE genre_id = ?",
-                    GenreImpl::mapRowToGenre, id);
+                    GenreStorageImpl::mapRowToGenre, id);
         } catch (RuntimeException e) {
             throw new NotFoundException(String.format("Жанр с id %d не найден", id));
         }
@@ -33,7 +33,7 @@ public class GenreImpl implements GenreStorage {
 
     @Override
     public List<Genre> getAllGenre() {
-        return jdbcTemplate.query("SELECT * FROM genres ORDER BY genre_id", GenreImpl::mapRowToGenre);
+        return jdbcTemplate.query("SELECT * FROM genres ORDER BY genre_id", GenreStorageImpl::mapRowToGenre);
     }
 
     @Override
@@ -42,17 +42,14 @@ public class GenreImpl implements GenreStorage {
         return new HashSet<>(jdbcTemplate.query("SELECT g.genre_id, g.name " +
                 "FROM genres AS g " +
                 "LEFT JOIN film_genre AS fg ON g.genre_id = fg.genre_id " +
-                "WHERE fg.film_id = ? ORDER BY fg.genre_id", GenreImpl::mapRowToGenre, id));
+                "WHERE fg.film_id = ? ORDER BY fg.genre_id", GenreStorageImpl::mapRowToGenre, id));
     }
 
     @Override
     public void addGenreToFilm(int id, Set<Genre> genres) {
         if (!genres.isEmpty()) {
-            for (Genre genre : genres) {
-                jdbcTemplate.update(
-                        "MERGE INTO film_genre (genre_id, film_id) VALUES (?, ?)",
-                        genre.getId(), id);
-            }
+            genres.forEach(genre -> jdbcTemplate.update("MERGE INTO film_genre (genre_id, film_id) VALUES (?, ?)",
+                    genre.getId(), id));
         }
     }
 

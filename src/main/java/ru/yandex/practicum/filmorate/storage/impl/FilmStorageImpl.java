@@ -18,16 +18,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
-@Component("film2")
+@Component("filmDBStorage")
 @RequiredArgsConstructor
-public class FilmImpl implements FilmStorage {
+public class FilmStorageImpl implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
 
     @Override
     public List<Film> getAllFilms() {
         return jdbcTemplate.query(
-                "select * from films f, mpa m where f.mpa_id = m.mpa_id", FilmImpl::mapRowToFilm);
+                "select * from films f, mpa m where f.mpa_id = m.mpa_id", FilmStorageImpl::mapRowToFilm);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class FilmImpl implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        if (getAllFilms().stream().anyMatch(x -> x.getId() == film.getId())) {
+        if (getById(film.getId()) != null) {
             jdbcTemplate.update("UPDATE films SET " +
                             "name = ?, description = ?, release_date = ?, " +
                             "duration = ?, mpa_id = ? WHERE film_id = ?",
@@ -72,7 +72,7 @@ public class FilmImpl implements FilmStorage {
             return jdbcTemplate.queryForObject("SELECT f.*, m.name " +
                     "FROM films AS f " +
                     "JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
-                    "WHERE f.film_id = ?", FilmImpl::mapRowToFilm, id);
+                    "WHERE f.film_id = ?", FilmStorageImpl::mapRowToFilm, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException(String.format("В таблице нет одной записи с id = %s", id));
         }
