@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,8 +49,13 @@ public class GenreStorageImpl implements GenreStorage {
     @Override
     public void addGenreToFilm(int id, Set<Genre> genres) {
         if (!genres.isEmpty()) {
-            genres.forEach(genre -> jdbcTemplate.update("MERGE INTO film_genre (genre_id, film_id) VALUES (?, ?)",
-                    genre.getId(), id));
+            String sql = "MERGE INTO film_genre (genre_id, film_id) VALUES (?, ?)";
+            List<Object[]> batchArgs = new ArrayList<>();
+            genres.forEach(genre -> {
+                Object[] args = {genre.getId(), id};
+                batchArgs.add(args);
+            });
+            jdbcTemplate.batchUpdate(sql, batchArgs);
         }
     }
 
@@ -58,7 +64,7 @@ public class GenreStorageImpl implements GenreStorage {
         Set<Genre> genres = film.getGenres();
         if (genres != null) {
             deleteAllGenreByFilm(film.getId());
-            genres.forEach(genre -> addGenreToFilm(film.getId(), film.getGenres()));
+            addGenreToFilm(film.getId(), film.getGenres());
         }
     }
 

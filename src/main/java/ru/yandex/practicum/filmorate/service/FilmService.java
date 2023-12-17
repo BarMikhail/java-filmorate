@@ -86,10 +86,6 @@ public class FilmService {
 
     public List<Film> getAllFilms() {
         List<Film> films = filmStorage.getAllFilms();
-        for (Film film : films) {
-            film.setGenres(genreStorage.getFilmGenre(film.getId()));
-            film.setLike(likeStorage.getLikes(film.getId()));
-        }
         log.info("Вывод всех фильмов");
         return recordingGenreAndMPA(films);
     }
@@ -102,6 +98,7 @@ public class FilmService {
             MPA mpaRating = mpa.stream().filter(m -> m.getId().equals(mpaId)).findFirst()
                     .orElseThrow(() -> new NotFoundException(String.format("Элемент c id %s не найден", mpaId)));
             film.setMpa(mpaRating);
+            film.setLike(likeStorage.getLikes(film.getId()));
             film.setGenres(genreStorage.getFilmGenre(film.getId()));
             fullFilms.add(film);
         }
