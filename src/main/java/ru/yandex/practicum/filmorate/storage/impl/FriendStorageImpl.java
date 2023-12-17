@@ -29,7 +29,7 @@ public class FriendStorageImpl implements FriendStorage {
     }
 
     @Override
-    public List<User> getFriends(int id){
+    public List<User> getFriends(int id) {
         return jdbcTemplate.query("SELECT u.* FROM users AS u " +
                 "RIGHT JOIN friends AS f ON u.user_id = f.friend_id WHERE f.user_id = ?", UserStorageImpl::mapRowToUser, id);
     }
