@@ -1,60 +1,107 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.MPAStorage;
+import ru.yandex.practicum.filmorate.validate.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Service
 @Slf4j
-@RequiredArgsConstructor
+@Service
 public class FilmService {
 
-    private final FilmStorage inMemoryFilmStorage;
+    private final FilmStorage filmStorage;
+    private final LikeStorage likeStorage;
+    private final GenreStorage genreStorage;
+    private final MPAStorage mpaStorage;
+
+    @Autowired
+    public FilmService(@Qualifier("filmDBStorage") FilmStorage filmStorage, @Qualifier("likeDBStorage") LikeStorage likeStorage,
+                       GenreStorage genreStorage, MPAStorage mpaStorage) {
+        this.filmStorage = filmStorage;
+        this.likeStorage = likeStorage;
+        this.genreStorage = genreStorage;
+        this.mpaStorage = mpaStorage;
+    }
 
     public void addLike(int id, int otherId) {
-        inMemoryFilmStorage.getById(id).addLike(otherId);
-        log.debug("Лайк поставлен");
+        likeStorage.addLike(id, otherId);
+        log.info("Лайк фильма");
     }
 
     public void deleteLike(int id, int otherId) {
-        inMemoryFilmStorage.getById(id).deleteLike(otherId);
-        log.debug("Лайк удален");
+        Film film = getById(id);
+        if (film.getLike().contains(otherId)) {
+            likeStorage.deleteLike(id, otherId);
+            log.info("Удаление лайка");
+        } else {
+            throw new NotFoundException(String.format("Пользователь с id %d не найден ", otherId));
+        }
     }
 
     public List<Film> getMostLikedFilms(int count) {
-        log.debug("Вывод самых понравившихся фильмов");
-        List<Film> films = new ArrayList<>(inMemoryFilmStorage.getAllFilms());
-        return films.stream()
-                .sorted((f1, f2) -> (f2.getLike().size() - f1.getLike().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+        List<Film> films = likeStorage.getMostLikedFilms(count);
+        log.info("Получение списка самых пролайканых фильмов");
+        return recordingGenreAndMPA(films);
     }
 
-
     public Film createFilm(Film film) {
-        return inMemoryFilmStorage.createFilm(film);
+        Validate.validateFilm(film);
+        Film createFilm = filmStorage.createFilm(film);
+        genreStorage.saveGenresByFilm(film);
+        log.info("Создание фильма");
+        return createFilm;
     }
 
     public Film updateFilm(Film film) {
-        return inMemoryFilmStorage.updateFilm(film);
+        Validate.validateFilm(film);
+        filmStorage.updateFilm(film);
+        genreStorage.saveGenresByFilm(film);
+        log.info("Обновление фильма");
+        return getById(film.getId());
     }
 
     public void deleteFilm(int id) {
-        inMemoryFilmStorage.deleteFilm(id);
+        filmStorage.deleteFilm(id);
+        log.info("Удаление фильма");
     }
 
     public Film getById(int id) {
-        return inMemoryFilmStorage.getById(id);
+        Film film = filmStorage.getById(id);
+        film.setLike(likeStorage.getLikes(id));
+        film.setGenres(genreStorage.getFilmGenre(id));
+        log.info("Вывод определенного фильма");
+        return film;
     }
 
     public List<Film> getAllFilms() {
-        return inMemoryFilmStorage.getAllFilms();
+        List<Film> films = filmStorage.getAllFilms();
+        log.info("Вывод всех фильмов");
+        return recordingGenreAndMPA(films);
     }
 
+    private List<Film> recordingGenreAndMPA(List<Film> films) {
+        List<MPA> mpa = mpaStorage.getAllMPA();
+        List<Film> fullFilms = new ArrayList<>();
+        for (Film film : films) {
+            int mpaId = film.getMpa().getId();
+            MPA mpaRating = mpa.stream().filter(m -> m.getId().equals(mpaId)).findFirst()
+                    .orElseThrow(() -> new NotFoundException(String.format("Элемент c id %s не найден", mpaId)));
+            film.setMpa(mpaRating);
+            film.setLike(likeStorage.getLikes(film.getId()));
+            film.setGenres(genreStorage.getFilmGenre(film.getId()));
+            fullFilms.add(film);
+        }
+        return fullFilms;
+    }
 }

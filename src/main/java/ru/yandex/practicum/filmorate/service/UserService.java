@@ -1,85 +1,85 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.validate.Validate;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class UserService {
 
-    private final UserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
+    private final FriendStorage friendStorage;
+
+    public UserService(@Qualifier("userDBStorage") UserStorage userStorage, @Qualifier("friendDBStorage") FriendStorage friendStorage) {
+        this.userStorage = userStorage;
+        this.friendStorage = friendStorage;
+    }
 
 
     public void addFriend(int id, int friendId) {
-        if (id == friendId) {
-            throw new ValidationException("Ты не можешь быть своим же другом");
+        User user = getById(id);
+        User friendUser = getById(friendId);
+        Collection<User> users = getAllUser();
+        if (!users.contains(user) && users.contains(friendUser)) {
+            throw new ValidationException("User not found");
+        } else {
+            friendStorage.addFriend(id, friendId);
+            log.info("Добавление в друзья");
         }
-        User firstUser = inMemoryUserStorage.getById(id);
-        User secondUser = inMemoryUserStorage.getById(friendId);
-        firstUser.addFriends(friendId);
-        secondUser.addFriends(id);
-        log.debug("Пользователь с id {} добавил в друзья пользователя с id {}", id, friendId);
     }
 
     public void deleteFriend(int id, int friendId) {
-        if (id == friendId) {
-            throw new ValidationException("Ты не можешь быть своим же другом");
-        }
-        inMemoryUserStorage.getById(id).deleteFriends(friendId);
-        inMemoryUserStorage.getById(friendId).deleteFriends(id);
-        log.debug("Пользователь с id {} удалил из друзей пользователя с id {}", id, friendId);
+        friendStorage.deleteFriend(id, friendId);
+        log.info("Удаление из друзья");
     }
 
     public List<User> getFriend(int id) {
-        Set<Integer> friends = inMemoryUserStorage.getById(id).getFriends();
-        log.info("Вывод друзей пользователя {}", id);
-        return friends.stream()
-                .map(inMemoryUserStorage::getById)
-                .collect(Collectors.toList());
+        log.info("Вывод друзей");
+        return friendStorage.getFriends(id);
     }
 
     public final List<User> getCommonFriend(int id, int otherId) {
-        Set<Integer> user = inMemoryUserStorage.getById(id).getFriends();
-        Set<Integer> userFriend = inMemoryUserStorage.getById(otherId).getFriends();
-        List<User> users = new ArrayList<>();
-        for (int friend : user) {
-            if (userFriend.contains(friend)) {
-                users.add(inMemoryUserStorage.getById(friend));
-            }
-        }
-        log.debug("Вывод общих друзей {} с {}", id, otherId);
-        return users;
+        List<User> user = getFriend(id);
+        List<User> anotherUser = getFriend(otherId);
+        log.info("Вывод общих друзей");
+        return user.stream().filter(anotherUser::contains).collect(Collectors.toList());
     }
 
     public User createUser(User user) {
-        return inMemoryUserStorage.createUser(user);
+        Validate.validateUser(user);
+        log.info("Создание пользователя");
+        return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
-        return inMemoryUserStorage.updateUser(user);
+        Validate.validateUser(user);
+        log.info("Обновления пользователя");
+        return userStorage.updateUser(user);
     }
 
     public void deleteUser(int id) {
-        inMemoryUserStorage.deleteUser(id);
+        userStorage.deleteUser(id);
+        log.info("Удаление пользователя");
     }
 
     public User getById(int id) {
-        return inMemoryUserStorage.getById(id);
+        log.info("Вывод определенного пользователя");
+        return userStorage.getById(id);
     }
 
     public List<User> getAllUser() {
-        return inMemoryUserStorage.getAllUser();
+        log.info("Вывод всех пользователя");
+        return userStorage.getAllUser();
     }
-
 
 }
